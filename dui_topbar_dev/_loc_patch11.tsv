@@ -1,0 +1,51 @@
+# key<TAB>zh<TAB>en —— 第 16 轮：「装备库存」▼ 子菜单（12 个装备大类，数值直接显示具体数字）
+dui_m_equipment	装备库存	Equipment stockpile
+DUI_EXPAND_ARROW	▼	▼
+dui_e_infantry	步兵装备	Infantry equipment
+dui_e_infantry_text	[?num_equipment@infantry_equipment|0]	[?num_equipment@infantry_equipment|0]
+dui_e_infantry_sprite	GFX_dui_equip_infantry	GFX_dui_equip_infantry
+dui_e_infantry_tt	§Y步兵装备库存§!\n仓库中的数量：[?num_equipment@infantry_equipment|0]	§YInfantry equipment stock§!\nIn stockpile: [?num_equipment@infantry_equipment|0]
+dui_e_support	支援装备	Support equipment
+dui_e_support_text	[?num_equipment@support_equipment|0]	[?num_equipment@support_equipment|0]
+dui_e_support_sprite	GFX_dui_equip_support	GFX_dui_equip_support
+dui_e_support_tt	§Y支援装备库存§!\n仓库中的数量：[?num_equipment@support_equipment|0]	§YSupport equipment stock§!\nIn stockpile: [?num_equipment@support_equipment|0]
+dui_e_artillery	火炮	Artillery
+dui_e_artillery_text	[?num_equipment@artillery_equipment|0]	[?num_equipment@artillery_equipment|0]
+dui_e_artillery_sprite	GFX_dui_equip_artillery	GFX_dui_equip_artillery
+dui_e_artillery_tt	§Y火炮库存§!\n仓库中的数量：[?num_equipment@artillery_equipment|0]	§YArtillery stock§!\nIn stockpile: [?num_equipment@artillery_equipment|0]
+dui_e_antitank	反坦克	Anti-tank
+dui_e_antitank_text	[?num_equipment@anti_tank_equipment|0]	[?num_equipment@anti_tank_equipment|0]
+dui_e_antitank_sprite	GFX_dui_equip_antitank	GFX_dui_equip_antitank
+dui_e_antitank_tt	§Y反坦克装备库存§!\n仓库中的数量：[?num_equipment@anti_tank_equipment|0]	§YAnti-tank stock§!\nIn stockpile: [?num_equipment@anti_tank_equipment|0]
+dui_e_antiair	防空	Anti-air
+dui_e_antiair_text	[?num_equipment@anti_air_equipment|0]	[?num_equipment@anti_air_equipment|0]
+dui_e_antiair_sprite	GFX_dui_equip_antiair	GFX_dui_equip_antiair
+dui_e_antiair_tt	§Y防空装备库存§!\n仓库中的数量：[?num_equipment@anti_air_equipment|0]	§YAnti-air stock§!\nIn stockpile: [?num_equipment@anti_air_equipment|0]
+dui_e_rocketartillery	火箭炮	Rocket artillery
+dui_e_rocketartillery_text	[?num_equipment@rocket_artillery_equipment|0]	[?num_equipment@rocket_artillery_equipment|0]
+dui_e_rocketartillery_sprite	GFX_dui_equip_rocketartillery	GFX_dui_equip_rocketartillery
+dui_e_rocketartillery_tt	§Y火箭炮库存§!\n仓库中的数量：[?num_equipment@rocket_artillery_equipment|0]	§YRocket artillery stock§!\nIn stockpile: [?num_equipment@rocket_artillery_equipment|0]
+dui_e_armoredcar	装甲车	Armored car
+dui_e_armoredcar_text	[?num_equipment@armored_car_equipment|0]	[?num_equipment@armored_car_equipment|0]
+dui_e_armoredcar_sprite	GFX_dui_equip_armoredcar	GFX_dui_equip_armoredcar
+dui_e_armoredcar_tt	§Y装甲车库存§!\n仓库中的数量：[?num_equipment@armored_car_equipment|0]	§YArmored car stock§!\nIn stockpile: [?num_equipment@armored_car_equipment|0]
+dui_e_motorized	摩托化	Motorized
+dui_e_motorized_text	[?num_equipment@motorized_equipment|0]	[?num_equipment@motorized_equipment|0]
+dui_e_motorized_sprite	GFX_dui_equip_motorized	GFX_dui_equip_motorized
+dui_e_motorized_tt	§Y摩托化装备库存§!\n仓库中的数量：[?num_equipment@motorized_equipment|0]	§YMotorized stock§!\nIn stockpile: [?num_equipment@motorized_equipment|0]
+dui_e_mechanized	机械化	Mechanized
+dui_e_mechanized_text	[?num_equipment@mechanized_equipment|0]	[?num_equipment@mechanized_equipment|0]
+dui_e_mechanized_sprite	GFX_dui_equip_mechanized	GFX_dui_equip_mechanized
+dui_e_mechanized_tt	§Y机械化装备库存§!\n仓库中的数量：[?num_equipment@mechanized_equipment|0]	§YMechanized stock§!\nIn stockpile: [?num_equipment@mechanized_equipment|0]
+dui_e_lighttank	轻型坦克	Light tank
+dui_e_lighttank_text	[?num_equipment@light_tank_chassis|0]	[?num_equipment@light_tank_chassis|0]
+dui_e_lighttank_sprite	GFX_dui_equip_lighttank	GFX_dui_equip_lighttank
+dui_e_lighttank_tt	§Y轻型坦克库存§!\n仓库中的数量：[?num_equipment@light_tank_chassis|0]	§YLight tank stock§!\nIn stockpile: [?num_equipment@light_tank_chassis|0]
+dui_e_mediumtank	中型坦克	Medium tank
+dui_e_mediumtank_text	[?num_equipment@medium_tank_chassis|0]	[?num_equipment@medium_tank_chassis|0]
+dui_e_mediumtank_sprite	GFX_dui_equip_mediumtank	GFX_dui_equip_mediumtank
+dui_e_mediumtank_tt	§Y中型坦克库存§!\n仓库中的数量：[?num_equipment@medium_tank_chassis|0]	§YMedium tank stock§!\nIn stockpile: [?num_equipment@medium_tank_chassis|0]
+dui_e_heavytank	重型坦克	Heavy tank
+dui_e_heavytank_text	[?num_equipment@heavy_tank_chassis|0]	[?num_equipment@heavy_tank_chassis|0]
+dui_e_heavytank_sprite	GFX_dui_equip_heavytank	GFX_dui_equip_heavytank
+dui_e_heavytank_tt	§Y重型坦克库存§!\n仓库中的数量：[?num_equipment@heavy_tank_chassis|0]	§YHeavy tank stock§!\nIn stockpile: [?num_equipment@heavy_tank_chassis|0]

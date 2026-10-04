@@ -1,0 +1,51 @@
+spriteTypes = {
+
+	spriteType = {
+		name = "GFX_dui_equip_infantry"
+		texturefile = "gfx/equipment/dui_equip_infantry.dds"
+	}
+	spriteType = {
+		name = "GFX_dui_equip_support"
+		texturefile = "gfx/equipment/dui_equip_support.dds"
+	}
+	spriteType = {
+		name = "GFX_dui_equip_artillery"
+		texturefile = "gfx/equipment/dui_equip_artillery.dds"
+	}
+	spriteType = {
+		name = "GFX_dui_equip_antitank"
+		texturefile = "gfx/equipment/dui_equip_antitank.dds"
+	}
+	spriteType = {
+		name = "GFX_dui_equip_antiair"
+		texturefile = "gfx/equipment/dui_equip_antiair.dds"
+	}
+	spriteType = {
+		name = "GFX_dui_equip_rocketartillery"
+		texturefile = "gfx/equipment/dui_equip_rocketartillery.dds"
+	}
+	spriteType = {
+		name = "GFX_dui_equip_armoredcar"
+		texturefile = "gfx/equipment/dui_equip_armoredcar.dds"
+	}
+	spriteType = {
+		name = "GFX_dui_equip_motorized"
+		texturefile = "gfx/equipment/dui_equip_motorized.dds"
+	}
+	spriteType = {
+		name = "GFX_dui_equip_mechanized"
+		texturefile = "gfx/equipment/dui_equip_mechanized.dds"
+	}
+	spriteType = {
+		name = "GFX_dui_equip_lighttank"
+		texturefile = "gfx/equipment/dui_equip_lighttank.dds"
+	}
+	spriteType = {
+		name = "GFX_dui_equip_mediumtank"
+		texturefile = "gfx/equipment/dui_equip_mediumtank.dds"
+	}
+	spriteType = {
+		name = "GFX_dui_equip_heavytank"
+		texturefile = "gfx/equipment/dui_equip_heavytank.dds"
+	}
+}

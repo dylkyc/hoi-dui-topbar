@@ -1,0 +1,581 @@
+# ============================================================================
+#  DUI Dynamic Topbar HUD  --  脚本化 GUI 逻辑（两个 GUI）
+#  ---------------------------------------------------------------------------
+#  1) dui_topbar_hud  挂载 interface/dui_topbar.gui 里的 dui_topbar_root
+#     父窗口 top_bar。故意不写 dirty = ...，因此每 tick 刷新，
+#     格子里的数值就是持续变化的实时数据。
+#
+#  2) dui_topbar_menu 挂载 dui_menu_panel（独立容器）
+#     用 visible 整体显隐，配合 dirty 只在菜单内容变化时重建 38 条候选列表，
+#     避免每帧重建网格带来的性能开销。
+#
+#  交互：
+#      左键点格子  -> 打开指标选择菜单（该格子高亮）
+#      右键点格子  -> 移除该格子（后面的格子自动左移补位）
+#      左键点"+"   -> 增加一个空格子
+#      右键点"+"   -> 折叠 / 展开整条信息条
+#      Shift+右键"+" -> 恢复默认布局
+#      菜单项左键  -> 把该指标绑定到选中的格子
+#      菜单项Shift -> 绑定并再追加一个空格子
+# ============================================================================
+
+scripted_gui = {
+
+	# ========================================================================
+	#  顶栏信息条本体
+	# ========================================================================
+	dui_topbar_hud = {
+
+		context_type = player_context
+
+		window_name = "dui_topbar_root"
+		parent_window_token = top_bar
+
+		visible = {
+			always = yes
+		}
+
+		# 每个格子按当前绑定的指标换图标
+		properties = {
+			dui_slot_0_icon = { image = "[GetDUISlot0Icon]" }
+			dui_slot_1_icon = { image = "[GetDUISlot1Icon]" }
+			dui_slot_2_icon = { image = "[GetDUISlot2Icon]" }
+			dui_slot_3_icon = { image = "[GetDUISlot3Icon]" }
+			dui_slot_4_icon = { image = "[GetDUISlot4Icon]" }
+			dui_slot_5_icon = { image = "[GetDUISlot5Icon]" }
+			dui_slot_6_icon = { image = "[GetDUISlot6Icon]" }
+			dui_slot_7_icon = { image = "[GetDUISlot7Icon]" }
+		}
+
+		effects = {
+
+			# "+" 按钮：加一个格子
+			dui_add_button_click = {
+				dui_topbar_add_slot = yes
+			}
+			# 右键 "+"：折叠 / 展开
+			dui_add_button_right_click = {
+				dui_topbar_toggle_collapse = yes
+			}
+			# Shift + 右键 "+"：恢复默认布局
+			dui_add_button_shift_right_click = {
+				custom_effect_tooltip = DUI_RESET_HELP
+				dui_topbar_reset = yes
+			}
+
+			# ---------------- 格子 0 ----------------
+			dui_slot_0_btn_click = {
+				meta_effect = {
+					text = {
+						custom_effect_tooltip = "[X]_tt"
+					}
+					X = "[?dui_slot_0.GetTokenKey]"
+				}
+				custom_effect_tooltip = DUI_SLOT_HELP
+				if = {
+					limit = {
+						has_variable = dui_menu_open
+						check_variable = { dui_selected = 0 }
+					}
+					dui_topbar_close_menu = yes
+				}
+				else = {
+					set_variable = { dui_selected = 0 }
+					set_variable = { dui_target = 0 }
+					dui_topbar_open_menu = yes
+				}
+			}
+			dui_slot_0_btn_right_click = {
+				custom_effect_tooltip = DUI_SLOT_REMOVE_HELP
+				set_variable = { dui_selected = 0 }
+				set_variable = { dui_target = 0 }
+				dui_topbar_remove_slot = yes
+			}
+
+			# ---------------- 格子 1 ----------------
+			dui_slot_1_btn_click = {
+				meta_effect = {
+					text = {
+						custom_effect_tooltip = "[X]_tt"
+					}
+					X = "[?dui_slot_1.GetTokenKey]"
+				}
+				custom_effect_tooltip = DUI_SLOT_HELP
+				if = {
+					limit = {
+						has_variable = dui_menu_open
+						check_variable = { dui_selected = 1 }
+					}
+					dui_topbar_close_menu = yes
+				}
+				else = {
+					set_variable = { dui_selected = 1 }
+					set_variable = { dui_target = 1 }
+					dui_topbar_open_menu = yes
+				}
+			}
+			dui_slot_1_btn_right_click = {
+				custom_effect_tooltip = DUI_SLOT_REMOVE_HELP
+				set_variable = { dui_selected = 1 }
+				set_variable = { dui_target = 1 }
+				dui_topbar_remove_slot = yes
+			}
+
+			# ---------------- 格子 2 ----------------
+			dui_slot_2_btn_click = {
+				meta_effect = {
+					text = {
+						custom_effect_tooltip = "[X]_tt"
+					}
+					X = "[?dui_slot_2.GetTokenKey]"
+				}
+				custom_effect_tooltip = DUI_SLOT_HELP
+				if = {
+					limit = {
+						has_variable = dui_menu_open
+						check_variable = { dui_selected = 2 }
+					}
+					dui_topbar_close_menu = yes
+				}
+				else = {
+					set_variable = { dui_selected = 2 }
+					set_variable = { dui_target = 2 }
+					dui_topbar_open_menu = yes
+				}
+			}
+			dui_slot_2_btn_right_click = {
+				custom_effect_tooltip = DUI_SLOT_REMOVE_HELP
+				set_variable = { dui_selected = 2 }
+				set_variable = { dui_target = 2 }
+				dui_topbar_remove_slot = yes
+			}
+
+			# ---------------- 格子 3 ----------------
+			dui_slot_3_btn_click = {
+				meta_effect = {
+					text = {
+						custom_effect_tooltip = "[X]_tt"
+					}
+					X = "[?dui_slot_3.GetTokenKey]"
+				}
+				custom_effect_tooltip = DUI_SLOT_HELP
+				if = {
+					limit = {
+						has_variable = dui_menu_open
+						check_variable = { dui_selected = 3 }
+					}
+					dui_topbar_close_menu = yes
+				}
+				else = {
+					set_variable = { dui_selected = 3 }
+					set_variable = { dui_target = 3 }
+					dui_topbar_open_menu = yes
+				}
+			}
+			dui_slot_3_btn_right_click = {
+				custom_effect_tooltip = DUI_SLOT_REMOVE_HELP
+				set_variable = { dui_selected = 3 }
+				set_variable = { dui_target = 3 }
+				dui_topbar_remove_slot = yes
+			}
+
+			# ---------------- 格子 4 ----------------
+			dui_slot_4_btn_click = {
+				meta_effect = {
+					text = {
+						custom_effect_tooltip = "[X]_tt"
+					}
+					X = "[?dui_slot_4.GetTokenKey]"
+				}
+				custom_effect_tooltip = DUI_SLOT_HELP
+				if = {
+					limit = {
+						has_variable = dui_menu_open
+						check_variable = { dui_selected = 4 }
+					}
+					dui_topbar_close_menu = yes
+				}
+				else = {
+					set_variable = { dui_selected = 4 }
+					set_variable = { dui_target = 4 }
+					dui_topbar_open_menu = yes
+				}
+			}
+			dui_slot_4_btn_right_click = {
+				custom_effect_tooltip = DUI_SLOT_REMOVE_HELP
+				set_variable = { dui_selected = 4 }
+				set_variable = { dui_target = 4 }
+				dui_topbar_remove_slot = yes
+			}
+
+			# ---------------- 格子 5 ----------------
+			dui_slot_5_btn_click = {
+				meta_effect = {
+					text = {
+						custom_effect_tooltip = "[X]_tt"
+					}
+					X = "[?dui_slot_5.GetTokenKey]"
+				}
+				custom_effect_tooltip = DUI_SLOT_HELP
+				if = {
+					limit = {
+						has_variable = dui_menu_open
+						check_variable = { dui_selected = 5 }
+					}
+					dui_topbar_close_menu = yes
+				}
+				else = {
+					set_variable = { dui_selected = 5 }
+					set_variable = { dui_target = 5 }
+					dui_topbar_open_menu = yes
+				}
+			}
+			dui_slot_5_btn_right_click = {
+				custom_effect_tooltip = DUI_SLOT_REMOVE_HELP
+				set_variable = { dui_selected = 5 }
+				set_variable = { dui_target = 5 }
+				dui_topbar_remove_slot = yes
+			}
+
+			# ---------------- 格子 6 ----------------
+			dui_slot_6_btn_click = {
+				meta_effect = {
+					text = {
+						custom_effect_tooltip = "[X]_tt"
+					}
+					X = "[?dui_slot_6.GetTokenKey]"
+				}
+				custom_effect_tooltip = DUI_SLOT_HELP
+				if = {
+					limit = {
+						has_variable = dui_menu_open
+						check_variable = { dui_selected = 6 }
+					}
+					dui_topbar_close_menu = yes
+				}
+				else = {
+					set_variable = { dui_selected = 6 }
+					set_variable = { dui_target = 6 }
+					dui_topbar_open_menu = yes
+				}
+			}
+			dui_slot_6_btn_right_click = {
+				custom_effect_tooltip = DUI_SLOT_REMOVE_HELP
+				set_variable = { dui_selected = 6 }
+				set_variable = { dui_target = 6 }
+				dui_topbar_remove_slot = yes
+			}
+
+			# ---------------- 格子 7 ----------------
+			dui_slot_7_btn_click = {
+				meta_effect = {
+					text = {
+						custom_effect_tooltip = "[X]_tt"
+					}
+					X = "[?dui_slot_7.GetTokenKey]"
+				}
+				custom_effect_tooltip = DUI_SLOT_HELP
+				if = {
+					limit = {
+						has_variable = dui_menu_open
+						check_variable = { dui_selected = 7 }
+					}
+					dui_topbar_close_menu = yes
+				}
+				else = {
+					set_variable = { dui_selected = 7 }
+					set_variable = { dui_target = 7 }
+					dui_topbar_open_menu = yes
+				}
+			}
+			dui_slot_7_btn_right_click = {
+				custom_effect_tooltip = DUI_SLOT_REMOVE_HELP
+				set_variable = { dui_selected = 7 }
+				set_variable = { dui_target = 7 }
+				dui_topbar_remove_slot = yes
+			}
+		}
+
+		# ---------------- 格子的显隐 ----------------
+		triggers = {
+
+			# "+" 按钮始终可见（折叠后靠它展开）
+			dui_add_button_visible = {
+				always = yes
+			}
+
+			# 格子 0
+			dui_slot_0_visible = {
+				NOT = { has_variable = dui_collapsed }
+				check_variable = { dui_slot_count > 0 }
+			}
+			dui_slot_0_btn_visible = {
+				NOT = { has_variable = dui_collapsed }
+				check_variable = { dui_slot_count > 0 }
+			}
+			dui_slot_0_icon_visible = {
+				NOT = { has_variable = dui_collapsed }
+				check_variable = { dui_slot_count > 0 }
+			}
+			dui_slot_0_text_visible = {
+				NOT = { has_variable = dui_collapsed }
+				check_variable = { dui_slot_count > 0 }
+			}
+			dui_slot_0_hl_visible = {
+				NOT = { has_variable = dui_collapsed }
+				has_variable = dui_selected
+				check_variable = { dui_selected = 0 }
+			}
+
+			# 格子 1
+			dui_slot_1_visible = {
+				NOT = { has_variable = dui_collapsed }
+				check_variable = { dui_slot_count > 1 }
+			}
+			dui_slot_1_btn_visible = {
+				NOT = { has_variable = dui_collapsed }
+				check_variable = { dui_slot_count > 1 }
+			}
+			dui_slot_1_icon_visible = {
+				NOT = { has_variable = dui_collapsed }
+				check_variable = { dui_slot_count > 1 }
+			}
+			dui_slot_1_text_visible = {
+				NOT = { has_variable = dui_collapsed }
+				check_variable = { dui_slot_count > 1 }
+			}
+			dui_slot_1_hl_visible = {
+				NOT = { has_variable = dui_collapsed }
+				has_variable = dui_selected
+				check_variable = { dui_selected = 1 }
+			}
+
+			# 格子 2
+			dui_slot_2_visible = {
+				NOT = { has_variable = dui_collapsed }
+				check_variable = { dui_slot_count > 2 }
+			}
+			dui_slot_2_btn_visible = {
+				NOT = { has_variable = dui_collapsed }
+				check_variable = { dui_slot_count > 2 }
+			}
+			dui_slot_2_icon_visible = {
+				NOT = { has_variable = dui_collapsed }
+				check_variable = { dui_slot_count > 2 }
+			}
+			dui_slot_2_text_visible = {
+				NOT = { has_variable = dui_collapsed }
+				check_variable = { dui_slot_count > 2 }
+			}
+			dui_slot_2_hl_visible = {
+				NOT = { has_variable = dui_collapsed }
+				has_variable = dui_selected
+				check_variable = { dui_selected = 2 }
+			}
+
+			# 格子 3
+			dui_slot_3_visible = {
+				NOT = { has_variable = dui_collapsed }
+				check_variable = { dui_slot_count > 3 }
+			}
+			dui_slot_3_btn_visible = {
+				NOT = { has_variable = dui_collapsed }
+				check_variable = { dui_slot_count > 3 }
+			}
+			dui_slot_3_icon_visible = {
+				NOT = { has_variable = dui_collapsed }
+				check_variable = { dui_slot_count > 3 }
+			}
+			dui_slot_3_text_visible = {
+				NOT = { has_variable = dui_collapsed }
+				check_variable = { dui_slot_count > 3 }
+			}
+			dui_slot_3_hl_visible = {
+				NOT = { has_variable = dui_collapsed }
+				has_variable = dui_selected
+				check_variable = { dui_selected = 3 }
+			}
+
+			# 格子 4
+			dui_slot_4_visible = {
+				NOT = { has_variable = dui_collapsed }
+				check_variable = { dui_slot_count > 4 }
+			}
+			dui_slot_4_btn_visible = {
+				NOT = { has_variable = dui_collapsed }
+				check_variable = { dui_slot_count > 4 }
+			}
+			dui_slot_4_icon_visible = {
+				NOT = { has_variable = dui_collapsed }
+				check_variable = { dui_slot_count > 4 }
+			}
+			dui_slot_4_text_visible = {
+				NOT = { has_variable = dui_collapsed }
+				check_variable = { dui_slot_count > 4 }
+			}
+			dui_slot_4_hl_visible = {
+				NOT = { has_variable = dui_collapsed }
+				has_variable = dui_selected
+				check_variable = { dui_selected = 4 }
+			}
+
+			# 格子 5
+			dui_slot_5_visible = {
+				NOT = { has_variable = dui_collapsed }
+				check_variable = { dui_slot_count > 5 }
+			}
+			dui_slot_5_btn_visible = {
+				NOT = { has_variable = dui_collapsed }
+				check_variable = { dui_slot_count > 5 }
+			}
+			dui_slot_5_icon_visible = {
+				NOT = { has_variable = dui_collapsed }
+				check_variable = { dui_slot_count > 5 }
+			}
+			dui_slot_5_text_visible = {
+				NOT = { has_variable = dui_collapsed }
+				check_variable = { dui_slot_count > 5 }
+			}
+			dui_slot_5_hl_visible = {
+				NOT = { has_variable = dui_collapsed }
+				has_variable = dui_selected
+				check_variable = { dui_selected = 5 }
+			}
+
+			# 格子 6
+			dui_slot_6_visible = {
+				NOT = { has_variable = dui_collapsed }
+				check_variable = { dui_slot_count > 6 }
+			}
+			dui_slot_6_btn_visible = {
+				NOT = { has_variable = dui_collapsed }
+				check_variable = { dui_slot_count > 6 }
+			}
+			dui_slot_6_icon_visible = {
+				NOT = { has_variable = dui_collapsed }
+				check_variable = { dui_slot_count > 6 }
+			}
+			dui_slot_6_text_visible = {
+				NOT = { has_variable = dui_collapsed }
+				check_variable = { dui_slot_count > 6 }
+			}
+			dui_slot_6_hl_visible = {
+				NOT = { has_variable = dui_collapsed }
+				has_variable = dui_selected
+				check_variable = { dui_selected = 6 }
+			}
+
+			# 格子 7
+			dui_slot_7_visible = {
+				NOT = { has_variable = dui_collapsed }
+				check_variable = { dui_slot_count > 7 }
+			}
+			dui_slot_7_btn_visible = {
+				NOT = { has_variable = dui_collapsed }
+				check_variable = { dui_slot_count > 7 }
+			}
+			dui_slot_7_icon_visible = {
+				NOT = { has_variable = dui_collapsed }
+				check_variable = { dui_slot_count > 7 }
+			}
+			dui_slot_7_text_visible = {
+				NOT = { has_variable = dui_collapsed }
+				check_variable = { dui_slot_count > 7 }
+			}
+			dui_slot_7_hl_visible = {
+				NOT = { has_variable = dui_collapsed }
+				has_variable = dui_selected
+				check_variable = { dui_selected = 7 }
+			}
+		}
+	}
+
+	# ========================================================================
+	#  指标选择菜单
+	# ========================================================================
+	dui_topbar_menu = {
+
+		context_type = player_context
+
+		window_name = "dui_menu_panel"
+		parent_window_token = top_bar
+
+		# 菜单关闭时整个窗口隐藏，菜单关闭时数组也已清空
+		visible = {
+			has_variable = dui_menu_open
+		}
+
+		# 只有菜单内容变化时才重建候选列表（脚本化效果里 add_to_variable dui_menu_dirty）
+		dirty = dui_menu_dirty
+
+		properties = {
+			dui_menu_item_icon = { image = "[GetDUIMenuItemIcon]" }
+		}
+
+		dynamic_lists = {
+			dui_menu_grid = {
+				array = Root.dui_menu_items
+				value = dui_menu_v
+				index = dui_menu_i
+				change_scope = no
+				entry_container = "dui_menu_entry"
+			}
+		}
+
+
+			triggers = {
+				dui_menu_expand_visible = {
+					is_in_array = { dui_subcategory = dui_menu_v }
+				}
+			}
+
+		effects = {
+
+			# 选中某个指标
+			dui_menu_item_click = {
+			if = {
+				limit = { has_variable = dui_sub_open }
+				dui_topbar_assign = yes
+				dui_topbar_close_sub = yes
+			}
+			else = {
+				if = {
+					limit = { is_in_array = { dui_subcategory = dui_menu_v } }
+					dui_topbar_fill_sub = yes
+				}
+				else = {
+					dui_topbar_assign = yes
+				}
+			}
+		}
+			# Shift + 左键：选中并再追加一个空格子
+
+			dui_menu_item_shift_click = {
+				meta_effect = {
+					text = {
+						custom_effect_tooltip = "[X]_tt"
+					}
+					X = "[?dui_menu_v.GetTokenKey]"
+				}
+				custom_effect_tooltip = DUI_MENU_ITEM_HELP_SHIFT
+				dui_topbar_assign_append = yes
+			}
+			# 关闭菜单
+			# 弹窗里的「+」按钮：左键加格子 / 右键折叠 / Shift+右键复位
+			dui_menu_add_click = {
+				dui_topbar_add_slot = yes
+			}
+			dui_menu_add_right_click = {
+				dui_topbar_toggle_collapse = yes
+			}
+			dui_menu_add_shift_right_click = {
+				custom_effect_tooltip = DUI_RESET_HELP
+				dui_topbar_reset = yes
+			}
+
+			dui_menu_close_click = {
+				dui_topbar_close_menu = yes
+			}
+		}
+	}
+}

@@ -1,0 +1,550 @@
+# ============================================================================
+#  DUI Dynamic Topbar HUD  --  界面布局（2026-10-03 实测修正版）
+#  ---------------------------------------------------------------------------
+#  8 个可自定义的数据格，全部住在原版顶栏内部；点击格子弹出指标选择菜单。
+#
+#  ★ 锚点语义（踩过坑，务必记住）：
+#    Orientation = UPPER_RIGHT 时，位置里的 x 是「元素**左边缘**距屏幕右边缘
+#    的距离」，也就是 左边缘 = 屏幕宽度 + x。所以想让某个元素的**右边缘**落在
+#    距右边 R 的位置，必须写 x = -(R + 元素宽度)。
+#    （实测：单行 8 格方案里 x=-360 的格子实际出现在 1560~1656，而不是预想的
+#      1464~1560；弹窗面板也整体跑到屏幕外——都是这个原因。）
+#
+#  ★ 尺寸对齐原版（实测原版顶栏数据框 DDS 尺寸）：
+#       GFX_generic_box_smallest = 70x26   （政治点/稳定度/战争支持/工业/运输/燃料）
+#       GFX_generic_box_small    = 88x26
+#       GFX_generic_box_96       = 96x26   （人力框，本 mod 采用这个尺寸）
+#       GFX_generic_box_125      = 124x26
+#    本 mod 的格子尺寸 = 96x26，和原版人力框一模一样；底板也用同一个精灵
+#    GFX_generic_box_96（之前用的 GFX_tiled_generic_bg_1 是原版"经验框"那种
+#    29x29 平铺贴图，会被拉成 28 高、看起来比原版框更厚重）。
+#
+#  ★ 顶栏内的可用空档（1920 宽实测）：
+#      第 1 行 y 5~31 ：原版数据框一直排到 x=1026（核弹框），所以 x≥1040 才安全
+#      第 2 行 y 43~69：原版国策/情报按钮到 x≈1240；圆形警报组从 x≈1543 起
+#      右侧边界：暂停键与日期面板从 x≈1545 起
+#    → 第 1 行放 5 格（1040~1536），第 2 行放 3 格（1240~1536），8 格全在栏内。
+#
+#  ★「+」按钮放在第 2 行最左格的位置（= 第 8 格 dui_slot_7 的位置）：
+#    第 8 格只在格子数 = 8 时显示，而「+」只在格子数 < 8 时显示，两者永不同时出现，
+#    所以可以共用同一块位置，点了「+」之后新格子正好出现在同一个地方。
+#
+#  布局旋钮（LAYOUT）—— x 是「左边缘距屏幕右边的距离」，格子宽 96、间隔 100：
+#    第 1 行 y = 5   槽位 0..4  x = -480, -580, -680, -780, -880
+#    第 2 行 y = 43  槽位 5..7  x = -480, -580, -680
+#    「+」按钮        x = -680  y = 43
+#    选择菜单面板      x = -924  y = 80，size = 540 x 186（弹出窗口，不受"必须在顶栏内"限制）
+#    菜单网格容器      x = -158 y = 54（= 12 - 170：抵消引擎"首个条目右移一个条目宽度"）
+#    菜单条目          size = 170 x 26，图标 scale = 1
+#
+#  ★ 图标：所有指标都改用原版的小图标（18~27px：civ_factory / mil_factory /
+#    nav_dockyard_texticon / fuel / victory_points / war_score …），并用 scale = 1
+#    按原尺寸显示，这样和原版顶栏图标一样大。之前用的是 70x29 / 110x41 的宽条贴图，
+#    会被放大到占满整个格子，格子里的字都被挤掉了。
+# ============================================================================
+
+guiTypes = {
+
+	# ========================================================================
+	#  根容器：铺满屏幕，无背景，作为脚本化 GUI 的挂载点
+	#  （window_name = "dui_topbar_root"，parent_window_token = top_bar）
+	# ========================================================================
+	containerWindowType = {
+		name = "dui_topbar_root"
+		position = { x = 0 y = 0 }
+		size = { width = 100%% height = 100%% }
+		Orientation = UPPER_LEFT
+		clipping = no
+		moveable = no
+
+		# ------------------------------------------------------------------
+		#  第 1 行：槽位 0（最右）~ 槽位 4
+		#  注意：buttonType 不能写 size（会报 "Malformed token: width/height"），
+		#        按钮会自动铺满所在容器的尺寸，容器尺寸写在 containerWindowType 上。
+		# ------------------------------------------------------------------
+		containerWindowType = {
+			name = "dui_slot_0"
+			position = { x = -480 y = 5 }	# LAYOUT 第1行 第1格
+			size = { width = 96 height = 26 }
+			Orientation = UPPER_RIGHT
+			clipping = no
+
+			iconType = {
+				name = "dui_slot_0_hl"
+				spriteType = "GFX_execute_battle_plan_glow"
+				position = { x = 0 y = -1 }
+				alwaystransparent = yes
+			}
+			buttonType = {
+				name = "dui_slot_0_btn"
+				quadTextureSprite = "GFX_generic_box_96"
+				position = { x = 0 y = 0 }
+				clicksound = click_default
+				oversound = ui_menu_over
+			}
+			iconType = {
+				name = "dui_slot_0_icon"
+				spriteType = "GFX_pol_power_icon"
+				position = { x = 4 y = 1 }
+				scale = 1
+				alwaystransparent = yes
+			}
+			instantTextBoxType = {
+				name = "dui_slot_0_text"
+				position = { x = 27 y = 4 }
+				font = "hoi_18mbs"
+				text = "[GetDUISlot0Text]"
+				maxWidth = 67
+				maxHeight = 20
+				format = right
+				fixedsize = yes
+				alwaystransparent = yes
+			}
+		}
+
+		containerWindowType = {
+			name = "dui_slot_1"
+			position = { x = -580 y = 5 }	# LAYOUT 第1行 第2格
+			size = { width = 96 height = 26 }
+			Orientation = UPPER_RIGHT
+			clipping = no
+
+			iconType = {
+				name = "dui_slot_1_hl"
+				spriteType = "GFX_execute_battle_plan_glow"
+				position = { x = 0 y = -1 }
+				alwaystransparent = yes
+			}
+			buttonType = {
+				name = "dui_slot_1_btn"
+				quadTextureSprite = "GFX_generic_box_96"
+				position = { x = 0 y = 0 }
+				clicksound = click_default
+				oversound = ui_menu_over
+			}
+			iconType = {
+				name = "dui_slot_1_icon"
+				spriteType = "GFX_pol_power_icon"
+				position = { x = 4 y = 1 }
+				scale = 1
+				alwaystransparent = yes
+			}
+			instantTextBoxType = {
+				name = "dui_slot_1_text"
+				position = { x = 27 y = 4 }
+				font = "hoi_18mbs"
+				text = "[GetDUISlot1Text]"
+				maxWidth = 67
+				maxHeight = 20
+				format = right
+				fixedsize = yes
+				alwaystransparent = yes
+			}
+		}
+
+		containerWindowType = {
+			name = "dui_slot_2"
+			position = { x = -680 y = 5 }	# LAYOUT 第1行 第3格
+			size = { width = 96 height = 26 }
+			Orientation = UPPER_RIGHT
+			clipping = no
+
+			iconType = {
+				name = "dui_slot_2_hl"
+				spriteType = "GFX_execute_battle_plan_glow"
+				position = { x = 0 y = -1 }
+				alwaystransparent = yes
+			}
+			buttonType = {
+				name = "dui_slot_2_btn"
+				quadTextureSprite = "GFX_generic_box_96"
+				position = { x = 0 y = 0 }
+				clicksound = click_default
+				oversound = ui_menu_over
+			}
+			iconType = {
+				name = "dui_slot_2_icon"
+				spriteType = "GFX_pol_power_icon"
+				position = { x = 4 y = 1 }
+				scale = 1
+				alwaystransparent = yes
+			}
+			instantTextBoxType = {
+				name = "dui_slot_2_text"
+				position = { x = 27 y = 4 }
+				font = "hoi_18mbs"
+				text = "[GetDUISlot2Text]"
+				maxWidth = 67
+				maxHeight = 20
+				format = right
+				fixedsize = yes
+				alwaystransparent = yes
+			}
+		}
+
+		containerWindowType = {
+			name = "dui_slot_3"
+			position = { x = -780 y = 5 }	# LAYOUT 第1行 第4格
+			size = { width = 96 height = 26 }
+			Orientation = UPPER_RIGHT
+			clipping = no
+
+			iconType = {
+				name = "dui_slot_3_hl"
+				spriteType = "GFX_execute_battle_plan_glow"
+				position = { x = 0 y = -1 }
+				alwaystransparent = yes
+			}
+			buttonType = {
+				name = "dui_slot_3_btn"
+				quadTextureSprite = "GFX_generic_box_96"
+				position = { x = 0 y = 0 }
+				clicksound = click_default
+				oversound = ui_menu_over
+			}
+			iconType = {
+				name = "dui_slot_3_icon"
+				spriteType = "GFX_pol_power_icon"
+				position = { x = 4 y = 1 }
+				scale = 1
+				alwaystransparent = yes
+			}
+			instantTextBoxType = {
+				name = "dui_slot_3_text"
+				position = { x = 27 y = 4 }
+				font = "hoi_18mbs"
+				text = "[GetDUISlot3Text]"
+				maxWidth = 67
+				maxHeight = 20
+				format = right
+				fixedsize = yes
+				alwaystransparent = yes
+			}
+		}
+
+		containerWindowType = {
+			name = "dui_slot_4"
+			position = { x = -880 y = 5 }	# LAYOUT 第1行 第5格
+			size = { width = 96 height = 26 }
+			Orientation = UPPER_RIGHT
+			clipping = no
+
+			iconType = {
+				name = "dui_slot_4_hl"
+				spriteType = "GFX_execute_battle_plan_glow"
+				position = { x = 0 y = -1 }
+				alwaystransparent = yes
+			}
+			buttonType = {
+				name = "dui_slot_4_btn"
+				quadTextureSprite = "GFX_generic_box_96"
+				position = { x = 0 y = 0 }
+				clicksound = click_default
+				oversound = ui_menu_over
+			}
+			iconType = {
+				name = "dui_slot_4_icon"
+				spriteType = "GFX_pol_power_icon"
+				position = { x = 4 y = 1 }
+				scale = 1
+				alwaystransparent = yes
+			}
+			instantTextBoxType = {
+				name = "dui_slot_4_text"
+				position = { x = 27 y = 4 }
+				font = "hoi_18mbs"
+				text = "[GetDUISlot4Text]"
+				maxWidth = 67
+				maxHeight = 20
+				format = right
+				fixedsize = yes
+				alwaystransparent = yes
+			}
+		}
+
+		# ------------------------------------------------------------------
+		#  第 2 行：槽位 5 ~ 槽位 7（与原版国策/情报按钮同一横带，但在它们右侧）
+		# ------------------------------------------------------------------
+		containerWindowType = {
+			name = "dui_slot_5"
+			position = { x = -480 y = 43 }	# LAYOUT 第2行 第1格
+			size = { width = 96 height = 26 }
+			Orientation = UPPER_RIGHT
+			clipping = no
+
+			iconType = {
+				name = "dui_slot_5_hl"
+				spriteType = "GFX_execute_battle_plan_glow"
+				position = { x = 0 y = -1 }
+				alwaystransparent = yes
+			}
+			buttonType = {
+				name = "dui_slot_5_btn"
+				quadTextureSprite = "GFX_generic_box_96"
+				position = { x = 0 y = 0 }
+				clicksound = click_default
+				oversound = ui_menu_over
+			}
+			iconType = {
+				name = "dui_slot_5_icon"
+				spriteType = "GFX_pol_power_icon"
+				position = { x = 4 y = 1 }
+				scale = 1
+				alwaystransparent = yes
+			}
+			instantTextBoxType = {
+				name = "dui_slot_5_text"
+				position = { x = 27 y = 4 }
+				font = "hoi_18mbs"
+				text = "[GetDUISlot5Text]"
+				maxWidth = 67
+				maxHeight = 20
+				format = right
+				fixedsize = yes
+				alwaystransparent = yes
+			}
+		}
+
+		containerWindowType = {
+			name = "dui_slot_6"
+			position = { x = -580 y = 43 }	# LAYOUT 第2行 第2格
+			size = { width = 96 height = 26 }
+			Orientation = UPPER_RIGHT
+			clipping = no
+
+			iconType = {
+				name = "dui_slot_6_hl"
+				spriteType = "GFX_execute_battle_plan_glow"
+				position = { x = 0 y = -1 }
+				alwaystransparent = yes
+			}
+			buttonType = {
+				name = "dui_slot_6_btn"
+				quadTextureSprite = "GFX_generic_box_96"
+				position = { x = 0 y = 0 }
+				clicksound = click_default
+				oversound = ui_menu_over
+			}
+			iconType = {
+				name = "dui_slot_6_icon"
+				spriteType = "GFX_pol_power_icon"
+				position = { x = 4 y = 1 }
+				scale = 1
+				alwaystransparent = yes
+			}
+			instantTextBoxType = {
+				name = "dui_slot_6_text"
+				position = { x = 27 y = 4 }
+				font = "hoi_18mbs"
+				text = "[GetDUISlot6Text]"
+				maxWidth = 67
+				maxHeight = 20
+				format = right
+				fixedsize = yes
+				alwaystransparent = yes
+			}
+		}
+
+		containerWindowType = {
+			name = "dui_slot_7"
+			position = { x = -680 y = 43 }	# LAYOUT 第2行 第3格
+			size = { width = 96 height = 26 }
+			Orientation = UPPER_RIGHT
+			clipping = no
+
+			iconType = {
+				name = "dui_slot_7_hl"
+				spriteType = "GFX_execute_battle_plan_glow"
+				position = { x = 0 y = -1 }
+				alwaystransparent = yes
+			}
+			buttonType = {
+				name = "dui_slot_7_btn"
+				quadTextureSprite = "GFX_generic_box_96"
+				position = { x = 0 y = 0 }
+				clicksound = click_default
+				oversound = ui_menu_over
+			}
+			iconType = {
+				name = "dui_slot_7_icon"
+				spriteType = "GFX_pol_power_icon"
+				position = { x = 4 y = 1 }
+				scale = 1
+				alwaystransparent = yes
+			}
+			instantTextBoxType = {
+				name = "dui_slot_7_text"
+				position = { x = 27 y = 4 }
+				font = "hoi_18mbs"
+				text = "[GetDUISlot7Text]"
+				maxWidth = 67
+				maxHeight = 20
+				format = right
+				fixedsize = yes
+				alwaystransparent = yes
+			}
+		}
+
+		# ------------------------------------------------------------------
+		#  新增格子按钮「+」（右键 = 折叠/展开整条信息条，Shift+右键 = 复位）
+		#  外观 = 和数据格一样的 96x26 原版框，位置 = 第 2 行最左格（第 8 格）的位置
+		# ------------------------------------------------------------------
+		containerWindowType = {
+			name = "dui_add_wrap"
+			position = { x = -680 y = 43 }	# LAYOUT
+			size = { width = 96 height = 26 }
+			Orientation = UPPER_RIGHT
+			clipping = no
+
+			buttonType = {
+				name = "dui_add_button"
+				quadTextureSprite = "GFX_generic_box_96"
+				position = { x = 0 y = 0 }
+				clicksound = click_ok
+				oversound = ui_menu_over
+				pdx_tooltip = "DUI_ADD_TT"
+				pdx_tooltip_delayed = "DUI_ADD_TT_DELAYED"
+			}
+			instantTextBoxType = {
+				name = "dui_add_label"
+				position = { x = 0 y = 3 }
+				font = "hoi_18mbs"
+				text = "+"
+				maxWidth = 96
+				maxHeight = 22
+				format = centre
+				alwaystransparent = yes
+			}
+		}
+
+	}
+
+	# ========================================================================
+	#  顶层容器 2：指标选择面板（弹出窗口，位于顶栏下方）
+	#  （脚本化 GUI 的 window_name 必须是「独立容器」，不能嵌套在别的容器里；
+	#    整体显隐交给 scripted_gui 的 visible，所以这里直接用 background）
+	#  条目尺寸参考黑冰的选择菜单：每条一个原版风格的方框 + 左侧小图标 + 左对齐文字
+	# ========================================================================
+	containerWindowType = {
+		name = "dui_menu_panel"
+		position = { x = -816 y = 80 }	# LAYOUT
+		size = { width = 432 height = 260 }
+		Orientation = UPPER_RIGHT
+		clipping = no
+
+		background = {
+			name = "dui_menu_bg"
+			quadTextureSprite = "GFX_tiled_window2_1b_border"
+		}
+			instantTextBoxType = {
+				name = "dui_menu_header"
+				position = { x = 12 y = 8 }
+				font = "hoi_18mbs"
+				text = "DUI_MENU_HEADER"
+				maxWidth = 460
+				maxHeight = 24
+				format = left
+				alwaystransparent = yes
+			}
+			# 新增格子按钮（原版提示会盖住顶栏里那个位置，所以挪进弹窗里）
+			buttonType = {
+				name = "dui_menu_add"
+				quadTextureSprite = "GFX_generic_box_smallest"
+				position = { x = 324 y = 6 }
+				clicksound = click_ok
+				oversound = ui_menu_over
+				pdx_tooltip = "DUI_ADD_TT"
+				pdx_tooltip_delayed = "DUI_ADD_TT_DELAYED"
+			}
+			instantTextBoxType = {
+				name = "dui_menu_add_label"
+				position = { x = 324 y = 9 }
+				font = "hoi_16mbs"
+				text = "DUI_MENU_ADD"
+				maxWidth = 70
+				maxHeight = 20
+				format = centre
+				alwaystransparent = yes
+			}
+			buttonType = {
+				name = "dui_menu_close"
+				quadTextureSprite = "GFX_closebutton"
+				position = { x = 402 y = 6 }
+				clicksound = click_close
+				oversound = ui_menu_over
+				pdx_tooltip = "CLOSE"
+			}
+			# 展开箭头（显示在第一个条目「装备库存」右侧）
+
+
+			# 固定入口：点它展开 12 个装备大类（面板的直接子元素，永远可点）
+
+
+
+			containerWindowType = {
+				name = "dui_menu_grid_container"
+				# 注意：动态列表的第 1 个条目会被放在「容器左边缘 + 一个格位宽度」的位置，
+				# 所以这里先把 x 减去一个格位宽度（12 - 188 = -176）来抵消，
+				# 条目才会正好从面板左边 12px 处开始排。
+				position = { x = -124 y = 56 }	# LAYOUT
+				size = { width = 408 height = 189 }
+				clipping = no
+
+				# 由脚本化 GUI 的 dynamic_lists 动态填充
+				gridboxtype = {
+					name = "dui_menu_grid"
+					position = { x = 0 y = 0 }
+					size = { width = 408 height = 189 }
+					slotsize = { width = 136 height = 27 }
+					max_slots_horizontal = 3
+					max_slots_vertical = 7
+				}
+			}
+		}
+
+	# ========================================================================
+	#  菜单条目模板：数组里每个可选指标都会实例化一份
+	# ========================================================================
+	containerWindowType = {
+		name = "dui_menu_entry"
+		position = { x = 0 y = 0 }
+		size = { width = 124 height = 26 }
+
+		# 按钮的精灵就是"盒子"本身，它的原始尺寸 124x26 正好等于条目尺寸，
+		# 所以按钮会把图标和文字完整包在里面（之前用平铺贴图，按钮只画成贴图原始大小）。
+		buttonType = {
+			name = "dui_menu_item"
+			quadTextureSprite = "GFX_generic_box_125"
+			position = { x = 0 y = 0 }
+			clicksound = click_default
+			oversound = ui_menu_over
+		}
+		iconType = {
+			name = "dui_menu_item_icon"
+			spriteType = "GFX_pol_power_icon"
+			position = { x = 4 y = 3 }
+			scale = 1
+			alwaystransparent = yes
+		}
+		instantTextBoxType = {
+			name = "dui_menu_item_text"
+			position = { x = 26 y = 4 }
+			font = "hoi_16mbs"
+			text = "[?dui_menu_v.GetTokenLocalizedKey]"
+			maxWidth = 82
+			maxHeight = 20
+			format = left
+			alwaystransparent = yes
+		}
+				instantTextBoxType = {
+				name = "dui_menu_expand"
+				position = { x = 106 y = 3 }
+				font = "hoi_16mbs"
+				text = "DUI_EXPAND_ARROW"
+				maxWidth = 14
+				maxHeight = 20
+				format = center
+				alwaystransparent = yes
+			}}
+
+}

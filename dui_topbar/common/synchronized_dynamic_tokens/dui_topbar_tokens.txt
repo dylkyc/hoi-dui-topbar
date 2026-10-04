@@ -1,0 +1,63 @@
+# ============================================================================
+#  DUI Dynamic Topbar HUD  --  自定义动态 token
+#  ---------------------------------------------------------------------------
+#  每个 token 就是一个可以存进变量、再由 [?</*].GetTokenKey /
+#  GetTokenLocalizedKey 反查名称与本地化键的“枚举值”。
+#  文件名故意不用 tokens.txt，避免覆盖原版的同名文件。
+# ============================================================================
+
+dui_m_empty
+dui_m_pp
+dui_m_pp_daily
+dui_m_stability
+dui_m_war_support
+dui_m_command_power
+dui_m_conscription
+dui_m_paranoia
+dui_m_threat
+dui_m_manpower
+dui_m_population
+dui_m_army_manpower
+dui_m_divisions
+dui_m_battalions
+dui_m_planes
+dui_m_ships
+dui_m_casualties
+dui_m_surrender
+dui_m_warscore
+dui_m_enemy_strength
+dui_m_army_xp
+dui_m_navy_xp
+dui_m_air_xp
+dui_m_equipment
+dui_m_civ_factories
+dui_m_mil_factories
+dui_m_naval_factories
+dui_m_free_civ
+dui_m_fuel
+dui_m_fuel_ratio
+dui_m_steel
+dui_m_aluminium
+dui_m_tungsten
+dui_m_chromium
+dui_m_rubber
+dui_m_oil
+dui_m_research
+dui_m_research_slots
+dui_m_industry
+dui_m_army_strength
+dui_m_air_strength
+dui_m_navy_strength
+
+dui_e_infantry
+dui_e_support
+dui_e_artillery
+dui_e_antitank
+dui_e_antiair
+dui_e_rocketartillery
+dui_e_armoredcar
+dui_e_motorized
+dui_e_mechanized
+dui_e_lighttank
+dui_e_mediumtank
+dui_e_heavytank

@@ -1,0 +1,7 @@
+# key<TAB>zh<TAB>en —— 第 8 轮：名称缩短（原来的名字在弹窗里换行被裁掉）+ 弹窗新增按钮文本
+dui_m_pp_daily	每日政治点	Political power / day
+dui_m_stability	稳定度/日	Stability / day
+dui_m_war_support	战争支持度/日	War support / day
+dui_m_command_power	指挥点/日	Command power / day
+dui_m_army_manpower	已部署陆军	Deployed army
+DUI_MENU_ADD	+ 新增格子	+ Add slot

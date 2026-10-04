@@ -1,0 +1,5 @@
+# key<TAB>zh<TAB>en —— 第 12 轮：稳定度/战争支持度按原版习惯改成"每周"口径
+dui_m_stability	稳定度/周	Stability / week
+dui_m_war_support	战争支持/周	War support / week
+DUI_STABILITY_DELTA	[?dui_stability_week|+=2]% / 周	[?dui_stability_week|+=2]% / week
+DUI_WAR_SUPPORT_DELTA	[?dui_war_support_week|+=2]% / 周	[?dui_war_support_week|+=2]% / week

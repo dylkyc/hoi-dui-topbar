@@ -1,0 +1,5 @@
+# key<TAB>zh<TAB>en —— 第 13 轮：稳定度/战争支持度改成直接读原版修饰符（= 悬停窗口里那个"每周变化"）
+dui_m_stability_text	[?modifier@stability_weekly|%2]	[?modifier@stability_weekly|%2]
+dui_m_war_support_text	[?modifier@war_support_weekly|%2]	[?modifier@war_support_weekly|%2]
+dui_m_stability_tt	§Y稳定度每周变化§!\n每周修正合计：[?modifier@stability_weekly|%2]	§YStability weekly change§!\nSum of weekly modifiers: [?modifier@stability_weekly|%2]
+dui_m_war_support_tt	§Y战争支持度每周变化§!\n每周修正合计：[?modifier@war_support_weekly|%2]	§YWar support weekly change§!\nSum of weekly modifiers: [?modifier@war_support_weekly|%2]

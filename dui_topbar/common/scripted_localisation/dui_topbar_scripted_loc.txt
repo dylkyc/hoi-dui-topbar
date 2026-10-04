@@ -1,0 +1,800 @@
+# ============================================================================
+#  DUI Dynamic Topbar HUD  --  脚本化本地化（动态文本分发）
+#  ---------------------------------------------------------------------------
+#  工作原理（黑冰同款思路）：
+#    1. GUI 里的文本框写 text = "[GetDUISlot0Text]"
+#    2. 这个 defined_text 用格子绑定的 token 拼出本地化键：
+#         [?dui_slot_0.GetTokenKey]_text   ->  例如 dui_m_pp_text
+#    3. 该键的内容就是真正的实时数值，例如 "[?political_power|0]"
+#       （直接引用游戏内置只读变量，每 tick 自动刷新）
+#
+#  想加新指标：在 localisation 里补 4 个键即可
+#      dui_m_xxx         名称（选择菜单显示）
+#      dui_m_xxx_text    数值格式
+#      dui_m_xxx_sprite  图标（原版精灵名）
+#      dui_m_xxx_tt      悬停说明
+# ============================================================================
+
+# ---------------------------- 8 个格子的数值 ----------------------------
+defined_text = {
+	name = GetDUISlot0Text
+	text = {
+		localization_key = [?dui_slot_0.GetTokenKey]_text
+	}
+}
+defined_text = {
+	name = GetDUISlot1Text
+	text = {
+		localization_key = [?dui_slot_1.GetTokenKey]_text
+	}
+}
+defined_text = {
+	name = GetDUISlot2Text
+	text = {
+		localization_key = [?dui_slot_2.GetTokenKey]_text
+	}
+}
+defined_text = {
+	name = GetDUISlot3Text
+	text = {
+		localization_key = [?dui_slot_3.GetTokenKey]_text
+	}
+}
+defined_text = {
+	name = GetDUISlot4Text
+	text = {
+		localization_key = [?dui_slot_4.GetTokenKey]_text
+	}
+}
+defined_text = {
+	name = GetDUISlot5Text
+	text = {
+		localization_key = [?dui_slot_5.GetTokenKey]_text
+	}
+}
+defined_text = {
+	name = GetDUISlot6Text
+	text = {
+		localization_key = [?dui_slot_6.GetTokenKey]_text
+	}
+}
+defined_text = {
+	name = GetDUISlot7Text
+	text = {
+		localization_key = [?dui_slot_7.GetTokenKey]_text
+	}
+}
+
+# ---------------------------- 8 个格子的图标 ----------------------------
+defined_text = {
+	name = GetDUISlot0Icon
+	text = {
+		localization_key = [?dui_slot_0.GetTokenKey]_sprite
+	}
+}
+defined_text = {
+	name = GetDUISlot1Icon
+	text = {
+		localization_key = [?dui_slot_1.GetTokenKey]_sprite
+	}
+}
+defined_text = {
+	name = GetDUISlot2Icon
+	text = {
+		localization_key = [?dui_slot_2.GetTokenKey]_sprite
+	}
+}
+defined_text = {
+	name = GetDUISlot3Icon
+	text = {
+		localization_key = [?dui_slot_3.GetTokenKey]_sprite
+	}
+}
+defined_text = {
+	name = GetDUISlot4Icon
+	text = {
+		localization_key = [?dui_slot_4.GetTokenKey]_sprite
+	}
+}
+defined_text = {
+	name = GetDUISlot5Icon
+	text = {
+		localization_key = [?dui_slot_5.GetTokenKey]_sprite
+	}
+}
+defined_text = {
+	name = GetDUISlot6Icon
+	text = {
+		localization_key = [?dui_slot_6.GetTokenKey]_sprite
+	}
+}
+defined_text = {
+	name = GetDUISlot7Icon
+	text = {
+		localization_key = [?dui_slot_7.GetTokenKey]_sprite
+	}
+}
+
+# ---------------------------- 选择菜单里的条目 ----------------------------
+defined_text = {
+	name = GetDUIMenuItemIcon
+	text = {
+		localization_key = [?dui_menu_v.GetTokenKey]_sprite
+	}
+}
+defined_text = {
+	name = GetDUIMenuItemTT
+	text = {
+		localization_key = [?dui_menu_v.GetTokenKey]_tt
+	}
+}
+# 菜单条目里右侧显示的数值（和格子里显示的是同一套文本）
+defined_text = {
+	name = GetDUIMenuItemValue
+	text = {
+		localization_key = [?dui_menu_v.GetTokenKey]_text
+	}
+}
+
+# ---------------------------- 政治偏执度（苏联专属，按需显示） ----------------------------
+defined_text = {
+	name = GetDUIParanoiaValue
+	text = {
+		trigger = {
+			has_variable = SOV_paranoia
+		}
+		localization_key = "DUI_PARANOIA_VALUE"
+	}
+	text = {
+		localization_key = "DUI_NA_VALUE"
+	}
+}
+
+# ---------------------------- 稳定度 / 战争支持度的「日变化」 ----------------------------
+# 由 on_daily 的 dui_topbar_daily_snapshot 每天写入差值（百分比整数，两位小数）
+defined_text = {
+	name = GetDUIStabilityChange
+	text = {
+		trigger = {
+			has_variable = dui_stability_delta
+		}
+		localization_key = "DUI_STABILITY_DELTA"
+	}
+	text = {
+		localization_key = "DUI_NA_VALUE"
+	}
+}
+defined_text = {
+	name = GetDUIWarSupportChange
+	text = {
+		trigger = {
+			has_variable = dui_war_support_delta
+		}
+		localization_key = "DUI_WAR_SUPPORT_DELTA"
+	}
+	text = {
+		localization_key = "DUI_NA_VALUE"
+	}
+}
+
+defined_text = {
+	name = GetDUIEquipTest
+	text = {
+		trigger = { has_equipment = { infantry_equipment < 0 } }
+		localization_key = "DUI_TEST_DEFICIT"
+	}
+	text = {
+		localization_key = "DUI_TEST_NODEFICIT"
+	}
+}
+
+defined_text = {
+	name = GetDUIProbe_infantry
+	text = {
+		trigger = { has_equipment = { infantry_equipment < 0 } }
+		localization_key = "DUI_PROBE_NEG"
+	}
+	text = {
+		trigger = { has_equipment = { infantry_equipment > 0 } }
+		localization_key = "DUI_PROBE_POS"
+	}
+	text = {
+		localization_key = "DUI_PROBE_ZERO"
+	}
+}
+
+
+defined_text = {
+	name = GetDUIProbe_support
+	text = {
+		trigger = { has_equipment = { support_equipment < 0 } }
+		localization_key = "DUI_PROBE_NEG"
+	}
+	text = {
+		trigger = { has_equipment = { support_equipment > 0 } }
+		localization_key = "DUI_PROBE_POS"
+	}
+	text = {
+		localization_key = "DUI_PROBE_ZERO"
+	}
+}
+
+
+defined_text = {
+	name = GetDUIProbe_artillery
+	text = {
+		trigger = { has_equipment = { artillery_equipment < 0 } }
+		localization_key = "DUI_PROBE_NEG"
+	}
+	text = {
+		trigger = { has_equipment = { artillery_equipment > 0 } }
+		localization_key = "DUI_PROBE_POS"
+	}
+	text = {
+		localization_key = "DUI_PROBE_ZERO"
+	}
+}
+
+
+defined_text = {
+	name = GetDUIProbe_antitank
+	text = {
+		trigger = { has_equipment = { anti_tank_equipment < 0 } }
+		localization_key = "DUI_PROBE_NEG"
+	}
+	text = {
+		trigger = { has_equipment = { anti_tank_equipment > 0 } }
+		localization_key = "DUI_PROBE_POS"
+	}
+	text = {
+		localization_key = "DUI_PROBE_ZERO"
+	}
+}
+
+
+defined_text = {
+	name = GetDUIProbe_antiair
+	text = {
+		trigger = { has_equipment = { anti_air_equipment < 0 } }
+		localization_key = "DUI_PROBE_NEG"
+	}
+	text = {
+		trigger = { has_equipment = { anti_air_equipment > 0 } }
+		localization_key = "DUI_PROBE_POS"
+	}
+	text = {
+		localization_key = "DUI_PROBE_ZERO"
+	}
+}
+
+
+defined_text = {
+	name = GetDUIProbe_rocketartillery
+	text = {
+		trigger = { has_equipment = { rocket_artillery_equipment < 0 } }
+		localization_key = "DUI_PROBE_NEG"
+	}
+	text = {
+		trigger = { has_equipment = { rocket_artillery_equipment > 0 } }
+		localization_key = "DUI_PROBE_POS"
+	}
+	text = {
+		localization_key = "DUI_PROBE_ZERO"
+	}
+}
+
+
+defined_text = {
+	name = GetDUIProbe_armoredcar
+	text = {
+		trigger = { has_equipment = { armored_car_equipment < 0 } }
+		localization_key = "DUI_PROBE_NEG"
+	}
+	text = {
+		trigger = { has_equipment = { armored_car_equipment > 0 } }
+		localization_key = "DUI_PROBE_POS"
+	}
+	text = {
+		localization_key = "DUI_PROBE_ZERO"
+	}
+}
+
+
+defined_text = {
+	name = GetDUIProbe_motorized
+	text = {
+		trigger = { has_equipment = { motorized_equipment < 0 } }
+		localization_key = "DUI_PROBE_NEG"
+	}
+	text = {
+		trigger = { has_equipment = { motorized_equipment > 0 } }
+		localization_key = "DUI_PROBE_POS"
+	}
+	text = {
+		localization_key = "DUI_PROBE_ZERO"
+	}
+}
+
+
+defined_text = {
+	name = GetDUIProbe_mechanized
+	text = {
+		trigger = { has_equipment = { mechanized_equipment < 0 } }
+		localization_key = "DUI_PROBE_NEG"
+	}
+	text = {
+		trigger = { has_equipment = { mechanized_equipment > 0 } }
+		localization_key = "DUI_PROBE_POS"
+	}
+	text = {
+		localization_key = "DUI_PROBE_ZERO"
+	}
+}
+
+
+defined_text = {
+	name = GetDUIProbe_lighttank
+	text = {
+		trigger = { has_equipment = { light_tank_chassis < 0 } }
+		localization_key = "DUI_PROBE_NEG"
+	}
+	text = {
+		trigger = { has_equipment = { light_tank_chassis > 0 } }
+		localization_key = "DUI_PROBE_POS"
+	}
+	text = {
+		localization_key = "DUI_PROBE_ZERO"
+	}
+}
+
+
+defined_text = {
+	name = GetDUIProbe_mediumtank
+	text = {
+		trigger = { has_equipment = { medium_tank_chassis < 0 } }
+		localization_key = "DUI_PROBE_NEG"
+	}
+	text = {
+		trigger = { has_equipment = { medium_tank_chassis > 0 } }
+		localization_key = "DUI_PROBE_POS"
+	}
+	text = {
+		localization_key = "DUI_PROBE_ZERO"
+	}
+}
+
+
+defined_text = {
+	name = GetDUIProbe_heavytank
+	text = {
+		trigger = { has_equipment = { heavy_tank_chassis < 0 } }
+		localization_key = "DUI_PROBE_NEG"
+	}
+	text = {
+		trigger = { has_equipment = { heavy_tank_chassis > 0 } }
+		localization_key = "DUI_PROBE_POS"
+	}
+	text = {
+		localization_key = "DUI_PROBE_ZERO"
+	}
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+defined_text = {
+	name = GetDUIEquipBal_infantry
+	# 后勤 资源 列 = (已装备 - 需要) + 库存；负=缺口红，非负=绿
+	text = {
+		trigger = {
+			set_temp_variable = { dui_bal = num_equipment_in_armies@infantry_equipment }
+			subtract_from_temp_variable = { dui_bal = num_target_equipment_in_armies@infantry_equipment }
+			add_to_temp_variable = { dui_bal = num_equipment@infantry_equipment }
+			check_variable = { dui_bal < 0 }
+		}
+		localization_key = "DUI_BAL_NEG"
+	}
+	text = {
+		trigger = {
+			set_temp_variable = { dui_bal = num_equipment_in_armies@infantry_equipment }
+			subtract_from_temp_variable = { dui_bal = num_target_equipment_in_armies@infantry_equipment }
+			add_to_temp_variable = { dui_bal = num_equipment@infantry_equipment }
+		}
+		localization_key = "DUI_BAL_POS"
+	}
+}
+
+
+defined_text = {
+	name = GetDUIEquipBal_support
+	# 后勤 资源 列 = (已装备 - 需要) + 库存；负=缺口红，非负=绿
+	text = {
+		trigger = {
+			set_temp_variable = { dui_bal = num_equipment_in_armies@support_equipment }
+			subtract_from_temp_variable = { dui_bal = num_target_equipment_in_armies@support_equipment }
+			add_to_temp_variable = { dui_bal = num_equipment@support_equipment }
+			check_variable = { dui_bal < 0 }
+		}
+		localization_key = "DUI_BAL_NEG"
+	}
+	text = {
+		trigger = {
+			set_temp_variable = { dui_bal = num_equipment_in_armies@support_equipment }
+			subtract_from_temp_variable = { dui_bal = num_target_equipment_in_armies@support_equipment }
+			add_to_temp_variable = { dui_bal = num_equipment@support_equipment }
+		}
+		localization_key = "DUI_BAL_POS"
+	}
+}
+
+
+defined_text = {
+	name = GetDUIEquipBal_artillery
+	# 后勤 资源 列 = (已装备 - 需要) + 库存；负=缺口红，非负=绿
+	text = {
+		trigger = {
+			set_temp_variable = { dui_bal = num_equipment_in_armies@artillery_equipment }
+			subtract_from_temp_variable = { dui_bal = num_target_equipment_in_armies@artillery_equipment }
+			add_to_temp_variable = { dui_bal = num_equipment@artillery_equipment }
+			check_variable = { dui_bal < 0 }
+		}
+		localization_key = "DUI_BAL_NEG"
+	}
+	text = {
+		trigger = {
+			set_temp_variable = { dui_bal = num_equipment_in_armies@artillery_equipment }
+			subtract_from_temp_variable = { dui_bal = num_target_equipment_in_armies@artillery_equipment }
+			add_to_temp_variable = { dui_bal = num_equipment@artillery_equipment }
+		}
+		localization_key = "DUI_BAL_POS"
+	}
+}
+
+
+defined_text = {
+	name = GetDUIEquipBal_antitank
+	# 后勤 资源 列 = (已装备 - 需要) + 库存；负=缺口红，非负=绿
+	text = {
+		trigger = {
+			set_temp_variable = { dui_bal = num_equipment_in_armies@anti_tank_equipment }
+			subtract_from_temp_variable = { dui_bal = num_target_equipment_in_armies@anti_tank_equipment }
+			add_to_temp_variable = { dui_bal = num_equipment@anti_tank_equipment }
+			check_variable = { dui_bal < 0 }
+		}
+		localization_key = "DUI_BAL_NEG"
+	}
+	text = {
+		trigger = {
+			set_temp_variable = { dui_bal = num_equipment_in_armies@anti_tank_equipment }
+			subtract_from_temp_variable = { dui_bal = num_target_equipment_in_armies@anti_tank_equipment }
+			add_to_temp_variable = { dui_bal = num_equipment@anti_tank_equipment }
+		}
+		localization_key = "DUI_BAL_POS"
+	}
+}
+
+
+defined_text = {
+	name = GetDUIEquipBal_antiair
+	# 后勤 资源 列 = (已装备 - 需要) + 库存；负=缺口红，非负=绿
+	text = {
+		trigger = {
+			set_temp_variable = { dui_bal = num_equipment_in_armies@anti_air_equipment }
+			subtract_from_temp_variable = { dui_bal = num_target_equipment_in_armies@anti_air_equipment }
+			add_to_temp_variable = { dui_bal = num_equipment@anti_air_equipment }
+			check_variable = { dui_bal < 0 }
+		}
+		localization_key = "DUI_BAL_NEG"
+	}
+	text = {
+		trigger = {
+			set_temp_variable = { dui_bal = num_equipment_in_armies@anti_air_equipment }
+			subtract_from_temp_variable = { dui_bal = num_target_equipment_in_armies@anti_air_equipment }
+			add_to_temp_variable = { dui_bal = num_equipment@anti_air_equipment }
+		}
+		localization_key = "DUI_BAL_POS"
+	}
+}
+
+
+defined_text = {
+	name = GetDUIEquipBal_rocketartillery
+	# 后勤 资源 列 = (已装备 - 需要) + 库存；负=缺口红，非负=绿
+	text = {
+		trigger = {
+			set_temp_variable = { dui_bal = num_equipment_in_armies@rocket_artillery_equipment }
+			subtract_from_temp_variable = { dui_bal = num_target_equipment_in_armies@rocket_artillery_equipment }
+			add_to_temp_variable = { dui_bal = num_equipment@rocket_artillery_equipment }
+			check_variable = { dui_bal < 0 }
+		}
+		localization_key = "DUI_BAL_NEG"
+	}
+	text = {
+		trigger = {
+			set_temp_variable = { dui_bal = num_equipment_in_armies@rocket_artillery_equipment }
+			subtract_from_temp_variable = { dui_bal = num_target_equipment_in_armies@rocket_artillery_equipment }
+			add_to_temp_variable = { dui_bal = num_equipment@rocket_artillery_equipment }
+		}
+		localization_key = "DUI_BAL_POS"
+	}
+}
+
+
+defined_text = {
+	name = GetDUIEquipBal_armoredcar
+	# 后勤 资源 列 = (已装备 - 需要) + 库存；负=缺口红，非负=绿
+	text = {
+		trigger = {
+			set_temp_variable = { dui_bal = num_equipment_in_armies@armored_car_equipment }
+			subtract_from_temp_variable = { dui_bal = num_target_equipment_in_armies@armored_car_equipment }
+			add_to_temp_variable = { dui_bal = num_equipment@armored_car_equipment }
+			check_variable = { dui_bal < 0 }
+		}
+		localization_key = "DUI_BAL_NEG"
+	}
+	text = {
+		trigger = {
+			set_temp_variable = { dui_bal = num_equipment_in_armies@armored_car_equipment }
+			subtract_from_temp_variable = { dui_bal = num_target_equipment_in_armies@armored_car_equipment }
+			add_to_temp_variable = { dui_bal = num_equipment@armored_car_equipment }
+		}
+		localization_key = "DUI_BAL_POS"
+	}
+}
+
+
+defined_text = {
+	name = GetDUIEquipBal_motorized
+	# 后勤 资源 列 = (已装备 - 需要) + 库存；负=缺口红，非负=绿
+	text = {
+		trigger = {
+			set_temp_variable = { dui_bal = num_equipment_in_armies@motorized_equipment }
+			subtract_from_temp_variable = { dui_bal = num_target_equipment_in_armies@motorized_equipment }
+			add_to_temp_variable = { dui_bal = num_equipment@motorized_equipment }
+			check_variable = { dui_bal < 0 }
+		}
+		localization_key = "DUI_BAL_NEG"
+	}
+	text = {
+		trigger = {
+			set_temp_variable = { dui_bal = num_equipment_in_armies@motorized_equipment }
+			subtract_from_temp_variable = { dui_bal = num_target_equipment_in_armies@motorized_equipment }
+			add_to_temp_variable = { dui_bal = num_equipment@motorized_equipment }
+		}
+		localization_key = "DUI_BAL_POS"
+	}
+}
+
+
+defined_text = {
+	name = GetDUIEquipBal_mechanized
+	# 后勤 资源 列 = (已装备 - 需要) + 库存；负=缺口红，非负=绿
+	text = {
+		trigger = {
+			set_temp_variable = { dui_bal = num_equipment_in_armies@mechanized_equipment }
+			subtract_from_temp_variable = { dui_bal = num_target_equipment_in_armies@mechanized_equipment }
+			add_to_temp_variable = { dui_bal = num_equipment@mechanized_equipment }
+			check_variable = { dui_bal < 0 }
+		}
+		localization_key = "DUI_BAL_NEG"
+	}
+	text = {
+		trigger = {
+			set_temp_variable = { dui_bal = num_equipment_in_armies@mechanized_equipment }
+			subtract_from_temp_variable = { dui_bal = num_target_equipment_in_armies@mechanized_equipment }
+			add_to_temp_variable = { dui_bal = num_equipment@mechanized_equipment }
+		}
+		localization_key = "DUI_BAL_POS"
+	}
+}
+
+
+defined_text = {
+	name = GetDUIEquipBal_lighttank
+	# 后勤 资源 列 = (已装备 - 需要) + 库存；负=缺口红，非负=绿
+	text = {
+		trigger = {
+			set_temp_variable = { dui_bal = num_equipment_in_armies@light_tank_chassis }
+			subtract_from_temp_variable = { dui_bal = num_target_equipment_in_armies@light_tank_chassis }
+			add_to_temp_variable = { dui_bal = num_equipment@light_tank_chassis }
+			check_variable = { dui_bal < 0 }
+		}
+		localization_key = "DUI_BAL_NEG"
+	}
+	text = {
+		trigger = {
+			set_temp_variable = { dui_bal = num_equipment_in_armies@light_tank_chassis }
+			subtract_from_temp_variable = { dui_bal = num_target_equipment_in_armies@light_tank_chassis }
+			add_to_temp_variable = { dui_bal = num_equipment@light_tank_chassis }
+		}
+		localization_key = "DUI_BAL_POS"
+	}
+}
+
+
+defined_text = {
+	name = GetDUIEquipBal_mediumtank
+	# 后勤 资源 列 = (已装备 - 需要) + 库存；负=缺口红，非负=绿
+	text = {
+		trigger = {
+			set_temp_variable = { dui_bal = num_equipment_in_armies@medium_tank_chassis }
+			subtract_from_temp_variable = { dui_bal = num_target_equipment_in_armies@medium_tank_chassis }
+			add_to_temp_variable = { dui_bal = num_equipment@medium_tank_chassis }
+			check_variable = { dui_bal < 0 }
+		}
+		localization_key = "DUI_BAL_NEG"
+	}
+	text = {
+		trigger = {
+			set_temp_variable = { dui_bal = num_equipment_in_armies@medium_tank_chassis }
+			subtract_from_temp_variable = { dui_bal = num_target_equipment_in_armies@medium_tank_chassis }
+			add_to_temp_variable = { dui_bal = num_equipment@medium_tank_chassis }
+		}
+		localization_key = "DUI_BAL_POS"
+	}
+}
+
+
+defined_text = {
+	name = GetDUIEquipBal_heavytank
+	# 后勤 资源 列 = (已装备 - 需要) + 库存；负=缺口红，非负=绿
+	text = {
+		trigger = {
+			set_temp_variable = { dui_bal = num_equipment_in_armies@heavy_tank_chassis }
+			subtract_from_temp_variable = { dui_bal = num_target_equipment_in_armies@heavy_tank_chassis }
+			add_to_temp_variable = { dui_bal = num_equipment@heavy_tank_chassis }
+			check_variable = { dui_bal < 0 }
+		}
+		localization_key = "DUI_BAL_NEG"
+	}
+	text = {
+		trigger = {
+			set_temp_variable = { dui_bal = num_equipment_in_armies@heavy_tank_chassis }
+			subtract_from_temp_variable = { dui_bal = num_target_equipment_in_armies@heavy_tank_chassis }
+			add_to_temp_variable = { dui_bal = num_equipment@heavy_tank_chassis }
+		}
+		localization_key = "DUI_BAL_POS"
+	}
+}

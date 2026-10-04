@@ -1,0 +1,71 @@
+spriteTypes = {
+
+	spriteType = {
+		name = "GFX_dui_bi_pp_daily"
+		texturefile = "gfx/dui_icons/dui_bi_pp_daily.dds"
+	}
+	spriteType = {
+		name = "GFX_dui_bi_stability"
+		texturefile = "gfx/dui_icons/dui_bi_stability.dds"
+	}
+	spriteType = {
+		name = "GFX_dui_bi_war_support"
+		texturefile = "gfx/dui_icons/dui_bi_war_support.dds"
+	}
+	spriteType = {
+		name = "GFX_dui_bi_command_power"
+		texturefile = "gfx/dui_icons/dui_bi_command_power.dds"
+	}
+	spriteType = {
+		name = "GFX_dui_bi_paranoia"
+		texturefile = "gfx/texticons/SOV_paranoia_text_icon.dds"
+	}
+	spriteType = {
+		name = "GFX_dui_bi_conscription"
+		texturefile = "gfx/dui_icons/dui_bi_conscription.dds"
+	}
+	spriteType = {
+		name = "GFX_dui_bi_army_manpower"
+		texturefile = "gfx/dui_icons/dui_bi_army_manpower.dds"
+	}
+	spriteType = {
+		name = "GFX_dui_bi_divisions"
+		texturefile = "gfx/dui_icons/dui_bi_divisions.dds"
+	}
+	spriteType = {
+		name = "GFX_dui_bi_battalions"
+		texturefile = "gfx/dui_icons/dui_bi_battalions.dds"
+	}
+	spriteType = {
+		name = "GFX_dui_bi_planes"
+		texturefile = "gfx/dui_icons/dui_bi_planes.dds"
+	}
+	spriteType = {
+		name = "GFX_dui_bi_ships"
+		texturefile = "gfx/dui_icons/dui_bi_ships.dds"
+	}
+	spriteType = {
+		name = "GFX_dui_bi_equipment"
+		texturefile = "gfx/dui_icons/dui_bi_equipment.dds"
+	}
+	spriteType = {
+		name = "GFX_dui_bi_casualties"
+		texturefile = "gfx/dui_icons/dui_bi_casualties.dds"
+	}
+	spriteType = {
+		name = "GFX_dui_bi_surrender"
+		texturefile = "gfx/dui_icons/dui_bi_surrender.dds"
+	}
+	spriteType = {
+		name = "GFX_dui_bi_warscore"
+		texturefile = "gfx/dui_icons/dui_bi_warscore.dds"
+	}
+	spriteType = {
+		name = "GFX_dui_bi_enemy_strength"
+		texturefile = "gfx/dui_icons/dui_bi_enemy_strength.dds"
+	}
+	spriteType = {
+		name = "GFX_dui_bi_industry"
+		texturefile = "gfx/dui_icons/dui_bi_industry.dds"
+	}
+}

@@ -1,0 +1,427 @@
+# ============================================================================
+#  DUI Dynamic Topbar HUD  --  脚本化效果
+#  ---------------------------------------------------------------------------
+#  所有变量都存放在「国家」作用域（也就是玩家国家），随存档保存。
+#    dui_slot_count  : 当前显示的格子数量（1 ~ 8）
+#    dui_slot_0..7   : 每个格子绑定的指标 token（token:dui_m_xxx）
+#    dui_menu_items  : 打开选择菜单时临时填充的候选指标数组
+#    dui_menu_v      : 动态列表当前条目对应的 token（GUI 框架自动赋值）
+#    dui_selected    : 当前被选中的格子序号
+#    dui_menu_open   : 菜单是否打开
+#    dui_collapsed   : 是否折叠
+# ============================================================================
+
+
+# ----------------------------------------------------------------------------
+#  初始化：给一个国家写入默认布局
+#  （苏联 / 已有偏执度系统的国家，第 4 格默认显示政治偏执度）
+# ----------------------------------------------------------------------------
+dui_topbar_init = {
+	set_variable = { dui_slot_count = 4 }
+
+	set_variable = { dui_slot_0 = token:dui_m_pp_daily }
+	set_variable = { dui_slot_1 = token:dui_m_stability }
+	set_variable = { dui_slot_2 = token:dui_m_industry }
+
+	if = {
+		limit = {
+			OR = {
+				tag = SOV
+				has_variable = SOV_paranoia
+			}
+		}
+		set_variable = { dui_slot_3 = token:dui_m_paranoia }
+	}
+	else = {
+		set_variable = { dui_slot_3 = token:dui_m_surrender }
+	}
+
+	set_variable = { dui_slot_4 = token:dui_m_empty }
+	set_variable = { dui_slot_5 = token:dui_m_empty }
+	set_variable = { dui_slot_6 = token:dui_m_empty }
+	set_variable = { dui_slot_7 = token:dui_m_empty }
+
+	clear_variable = dui_menu_open
+	clear_variable = dui_selected
+	clear_array = dui_menu_items
+	set_variable = { dui_menu_dirty = 0 }
+}
+
+# 只在还没初始化过的时候初始化（新档开局 / 老档第一次点 + 时兜底）
+dui_topbar_init_if_needed = {
+	if = {
+		limit = {
+			NOT = { has_variable = dui_slot_count }
+		}
+		dui_topbar_init = yes
+	}
+}
+
+# ----------------------------------------------------------------------------
+#  重置为默认布局（Shift + 右键「+」）
+# ----------------------------------------------------------------------------
+dui_topbar_reset = {
+	clear_variable = dui_slot_count
+	clear_variable = dui_slot_0
+	clear_variable = dui_slot_1
+	clear_variable = dui_slot_2
+	clear_variable = dui_slot_3
+	clear_variable = dui_slot_4
+	clear_variable = dui_slot_5
+	clear_variable = dui_slot_6
+	clear_variable = dui_slot_7
+	clear_variable = dui_selected
+	clear_variable = dui_menu_open
+	clear_variable = dui_collapsed
+	clear_array = dui_menu_items
+	dui_topbar_init = yes
+}
+
+# ----------------------------------------------------------------------------
+#  「+」：增加一个格子（最多 8 个）
+# ----------------------------------------------------------------------------
+dui_topbar_add_slot = {
+	if = {
+		limit = {
+			NOT = { has_variable = dui_slot_count }
+		}
+		dui_topbar_init = yes
+	}
+	else_if = {
+		limit = {
+			check_variable = { dui_slot_count < 8 }
+		}
+		add_to_variable = { dui_slot_count = 1 }
+	}
+}
+
+# ----------------------------------------------------------------------------
+#  折叠 / 展开
+# ----------------------------------------------------------------------------
+dui_topbar_toggle_collapse = {
+	if = {
+		limit = {
+			has_variable = dui_collapsed
+		}
+		clear_variable = dui_collapsed
+	}
+	else = {
+		set_variable = { dui_collapsed = 1 }
+		dui_topbar_close_menu = yes
+	}
+}
+
+# ----------------------------------------------------------------------------
+#  打开指标选择菜单：把所有可选指标塞进数组，由 dynamic_lists 生成条目
+#  新增可选指标 = 在这里加一行 add_to_array
+# ----------------------------------------------------------------------------
+dui_topbar_open_menu = {
+	dui_topbar_init_if_needed = yes
+
+	set_variable = { dui_menu_open = 1 }
+	clear_array = dui_menu_items
+	clear_array = dui_subcategory
+	add_to_array = { dui_subcategory = token:dui_m_equipment }
+	add_to_array = { dui_menu_items = token:dui_m_equipment }
+
+	# ---- 变化 / 趋势 ----
+	# 政治点、指挥点直接用原版的「每日增长」变量；稳定度、战争支持度没有现成的
+	# 日变化变量，所以由 on_daily 的 dui_topbar_daily_snapshot 每天记录差值。
+	add_to_array = { dui_menu_items = token:dui_m_pp_daily }
+	add_to_array = { dui_menu_items = token:dui_m_stability }
+	add_to_array = { dui_menu_items = token:dui_m_war_support }
+	add_to_array = { dui_menu_items = token:dui_m_command_power }
+	# 「政治偏执度」只对苏联（或已经拥有偏执度系统的国家）提供，其它国家菜单里不会出现
+	if = {
+		limit = {
+			OR = {
+				tag = SOV
+				has_variable = SOV_paranoia
+			}
+		}
+		add_to_array = { dui_menu_items = token:dui_m_paranoia }
+	}
+
+	# ---- 军事与战争目标 ----
+	# 原版顶栏已经直接显示的东西不再放进菜单：可用人力、世界紧张度、陆/海/空经验、
+	# 燃料储量与燃料比例 —— 这些玩家在原版顶栏上本来就能一直看到。
+	add_to_array = { dui_menu_items = token:dui_m_army_manpower }
+	add_to_array = { dui_menu_items = token:dui_m_divisions }
+	add_to_array = { dui_menu_items = token:dui_m_battalions }
+	add_to_array = { dui_menu_items = token:dui_m_planes }
+	add_to_array = { dui_menu_items = token:dui_m_ships }
+	# 累计伤亡保留：派遣志愿军等也会有伤亡
+	add_to_array = { dui_menu_items = token:dui_m_casualties }
+
+	# 战争相关的项目只在开战后才出现在菜单里（投降进度 / 战争分数 / 敌我陆军比）
+	if = {
+		limit = { has_war = yes }
+		add_to_array = { dui_menu_items = token:dui_m_surrender }
+		add_to_array = { dui_menu_items = token:dui_m_warscore }
+		add_to_array = { dui_menu_items = token:dui_m_enemy_strength }
+	}
+
+	# ---- 工业 ----
+	# 民工/军工/船坞合并成一项「工业」，格子里显示「民工/军工/船坞」三个数字
+	add_to_array = { dui_menu_items = token:dui_m_industry }
+
+	# 通知菜单 GUI 重建候选列表（dirty 变量）
+	add_to_variable = { dui_menu_dirty = 1 }
+}
+
+# ----------------------------------------------------------------------------
+#  关闭菜单
+# ----------------------------------------------------------------------------
+dui_topbar_close_menu = {
+	clear_variable = dui_menu_open
+	clear_variable = dui_selected
+	clear_array = dui_menu_items
+	add_to_variable = { dui_menu_dirty = 1 }
+}
+
+# ----------------------------------------------------------------------------
+#  把菜单里选中的指标绑定到 dui_selected 指定的格子
+# ----------------------------------------------------------------------------
+dui_topbar_assign = {
+	if = {
+		limit = { has_variable = dui_target }
+		set_variable = { dui_selected = dui_target }
+	}
+	if = {
+		limit = { check_variable = { dui_selected = 0 } }
+		set_variable = { dui_slot_0 = dui_menu_v }
+	}
+	else_if = {
+		limit = { check_variable = { dui_selected = 1 } }
+		set_variable = { dui_slot_1 = dui_menu_v }
+	}
+	else_if = {
+		limit = { check_variable = { dui_selected = 2 } }
+		set_variable = { dui_slot_2 = dui_menu_v }
+	}
+	else_if = {
+		limit = { check_variable = { dui_selected = 3 } }
+		set_variable = { dui_slot_3 = dui_menu_v }
+	}
+	else_if = {
+		limit = { check_variable = { dui_selected = 4 } }
+		set_variable = { dui_slot_4 = dui_menu_v }
+	}
+	else_if = {
+		limit = { check_variable = { dui_selected = 5 } }
+		set_variable = { dui_slot_5 = dui_menu_v }
+	}
+	else_if = {
+		limit = { check_variable = { dui_selected = 6 } }
+		set_variable = { dui_slot_6 = dui_menu_v }
+	}
+	else_if = {
+		limit = { check_variable = { dui_selected = 7 } }
+		set_variable = { dui_slot_7 = dui_menu_v }
+	}
+
+	dui_topbar_close_menu = yes
+}
+
+# Shift + 左键：绑定并追加一个空格子
+dui_topbar_assign_append = {
+	dui_topbar_assign = yes
+	if = {
+		limit = {
+			check_variable = { dui_slot_count < 8 }
+		}
+		add_to_variable = { dui_slot_count = 1 }
+	}
+}
+
+# ----------------------------------------------------------------------------
+#  移除 dui_selected 指定的格子，后面的格子自动左移补位
+# ----------------------------------------------------------------------------
+dui_topbar_remove_slot = {
+	dui_topbar_init_if_needed = yes
+
+	if = {
+		limit = { check_variable = { dui_selected = 0 } }
+		set_variable = { dui_slot_0 = dui_slot_1 }
+		set_variable = { dui_slot_1 = dui_slot_2 }
+		set_variable = { dui_slot_2 = dui_slot_3 }
+		set_variable = { dui_slot_3 = dui_slot_4 }
+		set_variable = { dui_slot_4 = dui_slot_5 }
+		set_variable = { dui_slot_5 = dui_slot_6 }
+		set_variable = { dui_slot_6 = dui_slot_7 }
+		set_variable = { dui_slot_7 = token:dui_m_empty }
+	}
+	else_if = {
+		limit = { check_variable = { dui_selected = 1 } }
+		set_variable = { dui_slot_1 = dui_slot_2 }
+		set_variable = { dui_slot_2 = dui_slot_3 }
+		set_variable = { dui_slot_3 = dui_slot_4 }
+		set_variable = { dui_slot_4 = dui_slot_5 }
+		set_variable = { dui_slot_5 = dui_slot_6 }
+		set_variable = { dui_slot_6 = dui_slot_7 }
+		set_variable = { dui_slot_7 = token:dui_m_empty }
+	}
+	else_if = {
+		limit = { check_variable = { dui_selected = 2 } }
+		set_variable = { dui_slot_2 = dui_slot_3 }
+		set_variable = { dui_slot_3 = dui_slot_4 }
+		set_variable = { dui_slot_4 = dui_slot_5 }
+		set_variable = { dui_slot_5 = dui_slot_6 }
+		set_variable = { dui_slot_6 = dui_slot_7 }
+		set_variable = { dui_slot_7 = token:dui_m_empty }
+	}
+	else_if = {
+		limit = { check_variable = { dui_selected = 3 } }
+		set_variable = { dui_slot_3 = dui_slot_4 }
+		set_variable = { dui_slot_4 = dui_slot_5 }
+		set_variable = { dui_slot_5 = dui_slot_6 }
+		set_variable = { dui_slot_6 = dui_slot_7 }
+		set_variable = { dui_slot_7 = token:dui_m_empty }
+	}
+	else_if = {
+		limit = { check_variable = { dui_selected = 4 } }
+		set_variable = { dui_slot_4 = dui_slot_5 }
+		set_variable = { dui_slot_5 = dui_slot_6 }
+		set_variable = { dui_slot_6 = dui_slot_7 }
+		set_variable = { dui_slot_7 = token:dui_m_empty }
+	}
+	else_if = {
+		limit = { check_variable = { dui_selected = 5 } }
+		set_variable = { dui_slot_5 = dui_slot_6 }
+		set_variable = { dui_slot_6 = dui_slot_7 }
+		set_variable = { dui_slot_7 = token:dui_m_empty }
+	}
+	else_if = {
+		limit = { check_variable = { dui_selected = 6 } }
+		set_variable = { dui_slot_6 = dui_slot_7 }
+		set_variable = { dui_slot_7 = token:dui_m_empty }
+	}
+	else_if = {
+		limit = { check_variable = { dui_selected = 7 } }
+		set_variable = { dui_slot_7 = token:dui_m_empty }
+	}
+
+	if = {
+		limit = {
+			check_variable = { dui_slot_count > 0 }
+		}
+		subtract_from_variable = { dui_slot_count = 1 }
+	}
+
+	dui_topbar_close_menu = yes
+}
+
+# ----------------------------------------------------------------------------
+#  每天记录一次稳定度 / 战争支持度，算出「日变化」（百分比，两位小数）
+#  由 on_actions 的 on_daily 调用；每个国家各自记录，只有玩家自己的会显示。
+# ----------------------------------------------------------------------------
+dui_topbar_daily_snapshot = {
+
+	# 稳定度：先算日变化，再维护 7 日移位寄存器求"真实的过去 7 天累计变化"
+	# （原版稳定度/战争支持度的修正是 stability_weekly / war_support_weekly 这类
+	#   「每周」结算的修饰符，见 common/decisions 里的用法，所以显示口径用「周」）
+	if = {
+		limit = { has_variable = dui_prev_stability }
+		set_temp_variable = { dui_stab_now = stability }
+		subtract_from_temp_variable = { dui_stab_now = dui_prev_stability }
+		multiply_temp_variable = { dui_stab_now = 100 }
+		set_variable = { dui_stability_delta = dui_stab_now }
+		set_variable = { dui_sd7 = dui_sd6 }
+		set_variable = { dui_sd6 = dui_sd5 }
+		set_variable = { dui_sd5 = dui_sd4 }
+		set_variable = { dui_sd4 = dui_sd3 }
+		set_variable = { dui_sd3 = dui_sd2 }
+		set_variable = { dui_sd2 = dui_sd1 }
+		set_variable = { dui_sd1 = dui_stability_delta }
+		set_temp_variable = { dui_sw = dui_sd1 }
+		add_to_temp_variable = { dui_sw = dui_sd2 }
+		add_to_temp_variable = { dui_sw = dui_sd3 }
+		add_to_temp_variable = { dui_sw = dui_sd4 }
+		add_to_temp_variable = { dui_sw = dui_sd5 }
+		add_to_temp_variable = { dui_sw = dui_sd6 }
+		add_to_temp_variable = { dui_sw = dui_sd7 }
+		set_variable = { dui_stability_week = dui_sw }
+	}
+	set_variable = { dui_prev_stability = stability }
+
+	# 战争支持度：同上
+	if = {
+		limit = { has_variable = dui_prev_war_support }
+		set_temp_variable = { dui_ws_now = has_war_support }
+		subtract_from_temp_variable = { dui_ws_now = dui_prev_war_support }
+		multiply_temp_variable = { dui_ws_now = 100 }
+		set_variable = { dui_war_support_delta = dui_ws_now }
+		set_variable = { dui_wd7 = dui_wd6 }
+		set_variable = { dui_wd6 = dui_wd5 }
+		set_variable = { dui_wd5 = dui_wd4 }
+		set_variable = { dui_wd4 = dui_wd3 }
+		set_variable = { dui_wd3 = dui_wd2 }
+		set_variable = { dui_wd2 = dui_wd1 }
+		set_variable = { dui_wd1 = dui_war_support_delta }
+		set_temp_variable = { dui_ww = dui_wd1 }
+		add_to_temp_variable = { dui_ww = dui_wd2 }
+		add_to_temp_variable = { dui_ww = dui_wd3 }
+		add_to_temp_variable = { dui_ww = dui_wd4 }
+		add_to_temp_variable = { dui_ww = dui_wd5 }
+		add_to_temp_variable = { dui_ww = dui_wd6 }
+		add_to_temp_variable = { dui_ww = dui_wd7 }
+		set_variable = { dui_war_support_week = dui_ww }
+	}
+	set_variable = { dui_prev_war_support = has_war_support }
+}
+
+dui_topbar_fill_sub = {
+	clear_array = dui_menu_items
+	add_to_array = { dui_menu_items = token:dui_e_infantry }
+	add_to_array = { dui_menu_items = token:dui_e_support }
+	add_to_array = { dui_menu_items = token:dui_e_artillery }
+	add_to_array = { dui_menu_items = token:dui_e_antitank }
+	add_to_array = { dui_menu_items = token:dui_e_antiair }
+	add_to_array = { dui_menu_items = token:dui_e_rocketartillery }
+	add_to_array = { dui_menu_items = token:dui_e_armoredcar }
+	add_to_array = { dui_menu_items = token:dui_e_motorized }
+	add_to_array = { dui_menu_items = token:dui_e_mechanized }
+	add_to_array = { dui_menu_items = token:dui_e_lighttank }
+	add_to_array = { dui_menu_items = token:dui_e_mediumtank }
+	add_to_array = { dui_menu_items = token:dui_e_heavytank }
+	set_variable = { dui_subcategory_selected = dui_menu_v }
+	set_variable = { dui_sub_open = 1 }
+	add_to_variable = { dui_menu_dirty = 1 }
+}
+
+dui_topbar_close_sub = {
+	clear_variable = dui_sub_open
+	dui_topbar_open_menu = yes
+}
+
+
+dui_topbar_equip_snapshot = {
+	set_temp_variable = { dui_eq_tmp = num_equipment@mechanized_equipment }
+	set_variable = { dui_stock_mechanized = dui_eq_tmp }
+	set_temp_variable = { dui_eq_tmp = num_equipment@artillery_equipment }
+	set_variable = { dui_stock_artillery = dui_eq_tmp }
+	set_temp_variable = { dui_eq_tmp = num_equipment@heavy_tank_chassis }
+	set_variable = { dui_stock_heavytank = dui_eq_tmp }
+	set_temp_variable = { dui_eq_tmp = num_equipment@motorized_equipment }
+	set_variable = { dui_stock_motorized = dui_eq_tmp }
+	set_temp_variable = { dui_eq_tmp = num_equipment@armored_car_equipment }
+	set_variable = { dui_stock_armoredcar = dui_eq_tmp }
+	set_temp_variable = { dui_eq_tmp = num_equipment@light_tank_chassis }
+	set_variable = { dui_stock_lighttank = dui_eq_tmp }
+	set_temp_variable = { dui_eq_tmp = num_equipment@anti_air_equipment }
+	set_variable = { dui_stock_antiair = dui_eq_tmp }
+	set_temp_variable = { dui_eq_tmp = num_equipment@support_equipment }
+	set_variable = { dui_stock_support = dui_eq_tmp }
+	set_temp_variable = { dui_eq_tmp = num_equipment@infantry_equipment }
+	set_variable = { dui_stock_infantry = dui_eq_tmp }
+	set_temp_variable = { dui_eq_tmp = num_equipment@medium_tank_chassis }
+	set_variable = { dui_stock_mediumtank = dui_eq_tmp }
+	set_temp_variable = { dui_eq_tmp = num_equipment@anti_tank_equipment }
+	set_variable = { dui_stock_antitank = dui_eq_tmp }
+	set_temp_variable = { dui_eq_tmp = num_equipment@rocket_artillery_equipment }
+	set_variable = { dui_stock_rocketartillery = dui_eq_tmp }
+}
+
+dui_topbar_open_equip = {
+	dui_topbar_fill_sub = yes
+}
